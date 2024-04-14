@@ -110,8 +110,5 @@ with warnings.catch_warnings():
 
     os.system('cls')
     time.sleep(1)
-    try:
-        auth.connect(userDisk, tempDisk)
-        print("Setup done ! Rebooting...")
-    except FileNotFoundError:
-        auth.create_user(userDisk, tempDisk)
+    auth.connect(userDisk, tempDisk)
+    print("Setup done ! Rebooting...")

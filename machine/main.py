@@ -1,21 +1,22 @@
+from adrv import Disk
 import os
 import time
 
-from adrv import Disk
+import components.auth as auth
 import components.styles as st
 
 userDisk = Disk('ARR', './disks', 512000000000)
 tempDisk = Disk('TMP', './disks', 1024000000)
 
-try:
-    session = dict(zip(['username', 'password', 'admin'], tempDisk.read('$Session').content.replace('\r', '').split('\n')))
-    # Check if the given session has a match in the disk (plus the password)
-except FileNotFoundError: # Case there is no $Session file in the tempDisk
-    input(f"{st.red}{st.bold}err{st.r} Login failed, press [Enter] and reboot.")
-    exit()
-except OSError:
-    # Reconnect using username & pwd
-    pass
+session = {}
+while session == {}:
+    try:
+        session = dict(zip(['username', 'password', 'admin'], tempDisk.read('$Session').content.replace('\r', '').split('\n')))
+        # Check if the given session has a match in the disk (plus the password)
+    except: # Case there is no $Session file in the tempDisk
+        input(f"{st.red}{st.bold}err{st.r} Login failed, press [Enter] to reconnect.")
+        os.system('cls')
+        auth.connect()
 
 session['admin'] = bool(session['admin'])
 
