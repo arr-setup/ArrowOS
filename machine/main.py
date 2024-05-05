@@ -9,19 +9,9 @@ import components.gateway as gtw
 
 userDisk = Disk('ARR', './disks', 512000000000)
 tempDisk = Disk('TMP', './disks', 1024000000)
-tempDisk.format_disk() # Clear the ancient state
 
-auth.connect(userDisk, tempDisk)
-session = {}
-while session == {}:
-    try:
-        _session = gtw.split(tempDisk.read('$Session').content.decode())
-        session = dict(zip(('username', 'password', 'admin'), _session))
-        # Check if the given session has a match in the disk (plus the password)
-    except FileNotFoundError: # Case there is no $Session file in the tempDisk
-        input(f"{st.red}{st.bold}err{st.r} Login failed, press [Enter] to reconnect.")
-        os.system('clear')
-        auth.connect(userDisk, tempDisk)
+#------------------------------------- INIT COMPUTER STATE -------------------------------------
+# Fetch computer infos
 
 infos = {}
 while infos == {}:
@@ -34,14 +24,34 @@ while infos == {}:
         os.system('clear')
         exit()
 
+
+# Try login
+
+auth.connect(userDisk, tempDisk)
+session = {}
+while session == {}:
+    try:
+        _session = gtw.split(tempDisk.read('$Session').content.decode())
+        session = dict(zip(('username', 'password', 'admin'), _session))
+        # Check if the given session has a match in the disk (plus the password)
+    except FileNotFoundError: # Case there is no $Session file in the tempDisk
+        input(f"{st.red}{st.bold}err{st.r} Login failed, press [Enter] to reconnect.")
+        os.system('clear')
+        auth.connect(userDisk, tempDisk)
+        tempDisk.format_disk() # Clear data from old session
+
 try:
     session['admin'] = bool(session['admin'])
 except KeyError:
     session['admin'] = False
     time.sleep(1)
 
+
+# Introduce to basics if first login
+
 os.system('clear')
-if os.path.join("usr", session['username'], "work", "$Settings") not in userDisk.f_list():
+bootpath = os.path.join("usr", session['username'], "work", "$Config", "Boot")
+if bootpath not in userDisk.f_list():
     time.sleep(0.5)
     input(f"""{st.yellow}{st.bold}ArrowOS Terminal{st.r}
 
@@ -49,14 +59,25 @@ if os.path.join("usr", session['username'], "work", "$Settings") not in userDisk
 
     {st.yellow}{st.bold}Basic commands:{st.r}
     {st.t}{st.blue}go {st.green}<location:str>{st.r} - Change location
+    {st.t}{st.blue}sysdata {st.green}<name:id> -Action(a, d, i, c){st.r} - Manage system data
     {st.t}{st.blue}run {st.green}<file:path>{st.r} - Run a file located on the disk or on the web
-    {st.t}{st.blue}var {st.green}-Action(a, d) <name:id> [value:?Any]{st.r} - Assign or delete a variable
+    {st.t}{st.blue}var {st.green}-Action(a, d) <name:id> [value?:Any]{st.r} - Assign or delete a variable
     {st.t}{st.blue}file {st.green}-Action(n, i, d){st.r} - Manage files
+    {st.t}{st.blue}ls {st.green}-Options(c, d) [dir?:fp=.]{st.r} - List files in a directory
+    {st.t}{st.blue}rm {st.green}-Options(c){st.r} - Remove a directory and its content
 
     Press {st.bold}{st.yellow}[Enter]{st.r} to continue.""")
     os.system('clear')
 
-    userDisk.write(os.path.join("usr", session['username'], "work", "$Settings"), 'FirstBoot=True')
+    userDisk.write(bootpath, 'bootcount=1')
+else:
+    bootcfgraw = gtw.split(userDisk.read(bootpath).content.decode())
+    bootcfg = gtw.parse(bootcfgraw)
+    print(bootcfg)
+
+
+
+#------------------------------------- PROCESS -------------------------------------
 
 w = vm.Window(infos['name'], userDisk, tempDisk, session)
 
