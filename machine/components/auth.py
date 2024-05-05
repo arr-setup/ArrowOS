@@ -1,16 +1,21 @@
-import bcrypt
-import getpass
 import os
 import time
 
-from components import styles as st
+import adrv
+import bcrypt
+import getpass
 
-def connect(userDisk, tempDisk):
+
+from components import styles as st
+from components import gateway as gtw
+
+def connect(userDisk: adrv.Disk, tempDisk: adrv.Disk):
+    os.system('clear')
     try:
         username = ''
         while username == '':
-            _users = userDisk.read('$Users').content.split('\n')
-            users = [ dict(zip(['name', 'password', 'admin'], user.split('::'))) for user in _users ]
+            _users = gtw.split(userDisk.read('.sys\\$Users').content.decode())
+            users = gtw.parse(_users, ('name', 'password', 'admin'))
             users = [{ 'name': user['name'], 'password': user['password'], 'admin': bool(user['admin']) } for user in users ]
 
             __maxlenname = 0
@@ -27,9 +32,17 @@ def connect(userDisk, tempDisk):
                 line += f"{st.r}{f'{st.green}Admin' if user['admin'] else ''}{st.r}"
 
                 print(line)
+            
+            print(f"{st.gray}{st.bold}[BLANK]\t{st.blue}New{st.r}")
+            print()
 
             req = input(f"Enter your username: {st.yellow}")
-            matches = [ account for account in users if account['name'] == req ]
+            if req != '':
+                matches = [ account for account in users if account['name'] == req ]
+            else:
+                create_user(userDisk, tempDisk)
+                continue
+
             print(st.r, end ='')
 
             while len(matches) == 0:
@@ -41,10 +54,10 @@ def connect(userDisk, tempDisk):
             username = user['name']
             admin = user['admin']
 
-            print("Use [CTRL+C] to connect to another account")
+            print("Use [CTRL+C] to connect to another account", "\n")
 
             try:
-                salt = userDisk.read('.sys\\s\\$Salt').content.encode()
+                salt = userDisk.read('.sys\\s\\$Salt').content
                 password = bcrypt.hashpw(getpass.getpass(f"{st.gray}> Password: {st.r}").encode('UTF-8'), salt)
                 
                 while password != user['password'].encode('UTF-8'):
@@ -55,21 +68,22 @@ def connect(userDisk, tempDisk):
                 username = ''
 
         data = [ username, password.decode(), str(admin) ]
-        tempDisk.write('$Session', '::'.join(data), 'w')
+        tempDisk.write('$Session', '\n'.join(data), 'w')
     except FileNotFoundError:
         create_user(userDisk, tempDisk)
         
     print(f"{st.r}")
-    os.system("cls")
+    os.system("clear")
     time.sleep(5)
 
-def create_user(userDisk, tempDisk):
-    print(f"{st.gray}{st.bold}Create a superuser{st.r}")
+def create_user(userDisk: adrv.Disk, tempDisk: adrv.Disk):
+    os.system('clear')
+    print(f"{st.gray}{st.bold}Create an account{st.r}")
 
     def is_allowed(username: str) -> bool:
         allowedchars = "abcdefghijklmnopqrstuvwxyz"
         for char in username:
-            if not (char.isdigit() or char.lower() in allowedchars or char in '._'):
+            if not (char.isdigit() or char.lower() in allowedchars or char in '._$'):
                 return False
         
         return True
@@ -80,19 +94,20 @@ def create_user(userDisk, tempDisk):
         username = input(f"{st.gray}> Username: {st.yellow}")
     
     try:
-        salt = userDisk.read('.sys\\s\\$Salt').content.encode()
+        salt = userDisk.read('.sys\\s\\$Salt').content
     except FileNotFoundError:
         print(st.red, st.bold, f"err {st.r} SYSTEM disk not correctly configured.")
         exit()
 
-    password = bcrypt.hashpw(getpass.getpass(f"{st.gray}> Password (can be empty): {st.r}").encode('UTF-8'), salt)
+    password = bcrypt.hashpw(getpass.getpass(f"{st.gray}> Password: {st.r}").encode('UTF-8'), salt)
     confirm = bcrypt.hashpw(getpass.getpass(f"{st.gray}> Confirm password: {st.r}").encode('UTF-8'), salt)
     while confirm != password:
         print(f"{st.red}{st.bold}err{st.r} Passwords do not match. Start again.")
-        password = bcrypt.hashpw(getpass.getpass(f"{st.gray}> Password (can be empty): {st.r}").encode('UTF-8'), salt)
+        password = bcrypt.hashpw(getpass.getpass(f"{st.gray}> Password: {st.r}").encode('UTF-8'), salt)
         confirm = bcrypt.hashpw(getpass.getpass(f"{st.gray}> Confirm password: {st.r}").encode('UTF-8'), salt)
 
     data = [ username, confirm.decode(), "True" ]
 
-    userDisk.write('$Users', f"{username}::{password.decode()}::True", 'w')
+    userDisk.write('.sys\\$Users', f"{username}::{password.decode()}::True")
+    userDisk.write('.sys\\config\\usrdir', f"{username}::{userDisk.name}:\\usr\\{username}")
     tempDisk.write('$Session', '\n'.join(data), 'w')
