@@ -1,8 +1,10 @@
 import os
+import tempfile
 import time
 import warnings
 
-from adrv import Disk
+from adrv import Disk, bridge
+import arrowbit
 
 import components.auth as auth
 import components.styles as st
@@ -91,6 +93,8 @@ else:
 
 #------------------------------------- PROCESS -------------------------------------
 
+process = arrowbit.Process(userDisk, tempDisk, session)
+
 running = True
 while running:
     try:
@@ -100,6 +104,15 @@ while running:
 
         tempDisk.write('Output.L', '::'.join(['cmd', location, cmd.replace('::', '\:\:')]))
         w.refresh(session)
+
+        pcmd = arrowbit.parse(cmd)
+        if pcmd['module'] == 'arr' and pcmd['submodule'] in ['clear', 'reboot']:
+            os.system(userDisk.read(f".sys\\cmd\\{pcmd['submodule']}.sh").content.decode())
+        elif pcmd['module'] == 'arr' and pcmd['submodule'] in ['shutdown']:
+            exec(userDisk.read(f".sys\\cmd\\{pcmd['submodule']}").content.decode())
+        else:
+            process.exec(pcmd)
+
     except KeyboardInterrupt:
         running = False
         os.system('cd ..')
