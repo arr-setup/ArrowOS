@@ -35,8 +35,6 @@ while session == {}:
         session = dict(zip(('username', 'password', 'admin'), _session))
         # Check if the given session has a match in the disk (plus the password)
     except FileNotFoundError: # Case there is no $Session file in the tempDisk
-        input(f"{st.red}{st.bold}err{st.r} Login failed, press [Enter] to reconnect.")
-        os.system('clear')
         auth.connect(userDisk, tempDisk)
         tempDisk.format_disk() # Clear data from old session
 
@@ -59,12 +57,12 @@ if bootpath not in userDisk.f_list():
 
     {st.yellow}{st.bold}Basic commands:{st.r}
     {st.t}{st.blue}go {st.green}<location:str>{st.r} - Change location
-    {st.t}{st.blue}sysdata {st.green}<name:id> -Action(a, d, i, c){st.r} - Manage system data
+    {st.t}{st.blue}sysdata {st.green}<name:id> -Action(a, c, d, i){st.r} - Manage system data
     {st.t}{st.blue}run {st.green}<file:path>{st.r} - Run a file located on the disk or on the web
     {st.t}{st.blue}var {st.green}-Action(a, d) <name:id> [value?:Any]{st.r} - Assign or delete a variable
-    {st.t}{st.blue}file {st.green}-Action(n, i, d){st.r} - Manage files
+    {st.t}{st.blue}file {st.green}-Action(c, d, n){st.r} - Manage files
     {st.t}{st.blue}ls {st.green}-Options(c, d) [dir?:fp=.]{st.r} - List files in a directory
-    {st.t}{st.blue}rm {st.green}-Options(c){st.r} - Remove a directory and its content
+    {st.t}{st.blue}dir {st.green}-Options(d, m, n){st.r} - Manages directories
 
     Press {st.bold}{st.yellow}[Enter]{st.r} to continue.""")
     os.system('clear')
@@ -73,9 +71,7 @@ if bootpath not in userDisk.f_list():
 else:
     bootcfgraw = gtw.split(userDisk.read(bootpath).content.decode())
     bootcfg = gtw.parse(bootcfgraw)
-    print(bootcfg)
-
-
+    bootcfg['bootcount'] += 1
 
 #------------------------------------- PROCESS -------------------------------------
 
