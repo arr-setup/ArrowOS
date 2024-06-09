@@ -44,3 +44,23 @@ class Window:
                 line = data['content']
                 
             print(line)
+        
+    def ask(infos: list[tuple], prompt: str = "Choose an option: ", return_nb: bool = False):
+        print(prompt)
+        print()
+        
+        for opt in range(len(infos)):
+            print(f"{st.red}{opt + 1}-{st.r}", '\t'.join(infos), sep = "\t")
+
+        choice = ""
+        value = ""
+        while value == "":
+            try:
+                value = infos[choice - 1]
+            except:
+                choice = int(input("Choose an option: "))
+
+        if return_nb:
+            return choice - 1
+        else: 
+            return value
