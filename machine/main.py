@@ -1,6 +1,8 @@
-from adrv import Disk
 import os
 import time
+import warnings
+
+from adrv import Disk
 
 import components.auth as auth
 import components.styles as st
@@ -28,10 +30,16 @@ while infos == {}:
 
 w = vm.Window(infos['name'], userDisk, tempDisk)
 
-_boot = 2
-while _boot != 0:
-    os.system('clear')
-    _boot = w.boot()
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category = UserWarning, module = 'zipfile')
+    _boot = 2
+    while _boot != 0:
+        os.system('clear')
+        _boot = w.boot()
+        if _boot == 2:
+            os.system('clear')
+            print('Something went wrong...')
+            time.sleep(3)
 
 # Try login
 
