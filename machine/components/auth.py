@@ -14,7 +14,7 @@ def connect(userDisk: adrv.Disk, tempDisk: adrv.Disk):
     try:
         username = ''
         while username == '':
-            _users = gtw.split(userDisk.read('.sys\\$Users').content.decode())
+            _users = gtw.split(userDisk.read('.sys/$Users').content.decode())
             users = gtw.parse(_users, ('name', 'password', 'admin'))
             users = [{ 'name': user['name'], 'password': user['password'], 'admin': bool(user['admin']) } for user in users ]
 
@@ -57,7 +57,7 @@ def connect(userDisk: adrv.Disk, tempDisk: adrv.Disk):
             print("Use [CTRL+C] to connect to another account", "\n")
 
             try:
-                salt = userDisk.read('.sys\\s\\$Salt').content
+                salt = userDisk.read('.sys/s/$Salt').content
                 password = bcrypt.hashpw(getpass.getpass(f"{st.gray}> Password: {st.r}").encode('UTF-8'), salt)
                 
                 while password != user['password'].encode('UTF-8'):
@@ -94,7 +94,7 @@ def create_user(userDisk: adrv.Disk, tempDisk: adrv.Disk):
         username = input(f"{st.gray}> Username: {st.yellow}")
     
     try:
-        salt = userDisk.read('.sys\\s\\$Salt').content
+        salt = userDisk.read('.sys/s/$Salt').content
     except FileNotFoundError:
         print(st.red, st.bold, f"err {st.r} SYSTEM disk not correctly configured.")
         exit()
@@ -108,6 +108,6 @@ def create_user(userDisk: adrv.Disk, tempDisk: adrv.Disk):
 
     data = [ username, confirm.decode(), "True" ]
 
-    userDisk.write('.sys\\$Users', f"{username}::{password.decode()}::True")
-    userDisk.write('.sys\\config\\usrdir', f"{username}::{userDisk.name}:\\usr\\{username}")
+    userDisk.write('.sys/$Users', f"{username}::{password.decode()}::True")
+    userDisk.write('.sys/config/usrdir', f"{username}::{userDisk.name}:/usr/{username}")
     tempDisk.write('$Session', '\n'.join(data), 'w')

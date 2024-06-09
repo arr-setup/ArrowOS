@@ -35,14 +35,14 @@ def config():
     
     if new_disk:
         userDisk.format_disk()
-        userDisk.write('.sys\\s\\$Salt', bcrypt.gensalt(), 'w')
+        userDisk.write('.sys/s/$Salt', bcrypt.gensalt(), 'w')
         print("Should we install...")
 
-        tempDisk.write('.sys\\$Bootexec\\install.ar', 'req -g https://bowandarrow.pages.dev/modules/bow/installer.ar --save-on res;\nfile -n /.sys/bow/modules/bow/installer.ar res.content;', 'w')
+        tempDisk.write('.sys/$Bootexec/install.ar', 'req -g https://bowandarrow.pages.dev/modules/bow/installer.ar --save-on res;\nfile -n /.sys/bow/modules/bow/installer.ar res.content;', 'w')
         if input(f"{st.t}{st.gray}> Custom themes (Y/N){st.r} ") in ['Y', 'y', 'yes']:
-            tempDisk.write('.sys\\$Bootexec\\install.ar', 'bow -i "themes";')
+            tempDisk.write('.sys/$Bootexec/install.ar', 'bow -i "themes";')
         if input(f"{st.t}{st.gray}> Console (Y/N){st.r} ") in ['Y', 'y', 'yes']:
-            tempDisk.write('.sys\\$Bootexec\\install.ar', 'bow -i "console";')
+            tempDisk.write('.sys/$Bootexec/install.ar', 'bow -i "console";')
 
         os.system('clear')
     else:
@@ -101,8 +101,8 @@ def config():
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category = UserWarning, module = 'zipfile')
     try:
-        if '.sys\\$Info' in userDisk.f_list():
-            userDisk.delete('.sys\\$Info')
+        if '.sys/$Info' in userDisk.f_list():
+            userDisk.delete('.sys/$Info')
 
         config()
         
@@ -120,7 +120,7 @@ with warnings.catch_warnings():
             print(f"{st.red}{st.bold}err{st.r} Only alphanumeric characters, periods and underscores (_) are allowed in usernames.")
             name = input(f"{st.gray}Name your computer: {st.yellow}")
         
-        userDisk.write('.sys\\$Info', f'{name}\n{VERSION}')
+        userDisk.write('.sys/$Info', f'{name}\n{VERSION}')
     except KeyboardInterrupt:
         print(st.r)
         print("Configuration has been interrupted. Initializing machine... - ", end = "")

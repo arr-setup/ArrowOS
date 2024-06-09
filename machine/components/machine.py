@@ -22,7 +22,7 @@ class Window:
             text = exp.replace("\:\:", "::")
 
             text = re.sub(r"`(.+)`|\b(\d+)\b", fr"{st.green}\g<0>{st.r}", text)
-            text = re.sub(r"(~/[a-zA-Z0-9.+$()]+|~\\[a-zA-Z0-9.+$()]+|/[a-zA-Z0-9.+$()]+|\\[a-zA-Z0-9.+$()]+|~|/|\\|\./[a-zA-Z0-9.+$()]+|\.\\[a-zA-Z0-9.+$()]+|\.\./[a-zA-Z0-9.+$()]+|\.\.\\[a-zA-Z0-9.+$()]+)|\$\.([A-Za-z]+)", fr"{st.yellow}\g<0>{st.r}", text)
+            text = re.sub(r"(~/[a-zA-Z0-9.+$()]+|/[a-zA-Z0-9.+$()]+~|/|\./[a-zA-Z0-9.+$()]+|\.\./[a-zA-Z0-9.+$()]+)|\$\.([A-Za-z]+)", fr"{st.yellow}\g<0>{st.r}", text)
             text = re.sub(r"'(.+)'|\"(.+)\"", fr"{st.cyan}\g<0>{st.r}", text)
             text = re.sub(r"--([A-Za-z]+)|-([A-Za-z]+)", fr"{st.gray}\g<0>{st.r}", text)
 

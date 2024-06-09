@@ -22,7 +22,7 @@ tempDisk = Disk('TMP', './disks', 1024000000)
 infos = {}
 while infos == {}:
     try:
-        _infos = gtw.split(userDisk.read('.sys\\$Info').content.decode())
+        _infos = gtw.split(userDisk.read('.sys/$Info').content.decode())
         infos = dict(zip(('name', 'version'), _infos))
     except FileNotFoundError:
         print(f"{st.red}{st.bold}err{st.r} Your disk is not totally configured for this version.")
@@ -107,9 +107,9 @@ while running:
 
         pcmd = arrowbit.parse(cmd)
         if pcmd['module'] == 'arr' and pcmd['submodule'] in ['reboot']:
-            os.system(userDisk.read(f".sys\\cmd\\{pcmd['submodule']}.sh").content.decode())
+            os.system(userDisk.read(f".sys/cmd/{pcmd['submodule']}.sh").content.decode())
         elif pcmd['module'] == 'arr' and pcmd['submodule'] in ['clear', 'shutdown']:
-            exec(userDisk.read(f".sys\\cmd\\{pcmd['submodule']}").content.decode())
+            exec(userDisk.read(f".sys/cmd/{pcmd['submodule']}").content.decode())
         else:
             process.exec(pcmd)
 
