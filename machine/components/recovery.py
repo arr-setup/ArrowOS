@@ -25,7 +25,7 @@ def installArrowBit(ud: adrv.Disk):
     print(f"{st.gray}Writing system commands...", end = ' ')
     ud.write('.sys\\cmd\\shutdown', 'raise KeyboardInterrupt', 'w')
     ud.write('.sys\\cmd\\reboot.sh', 'py machine/main.py', 'w') # Maybe just reset the tempDisk
-    ud.write('.sys\\cmd\\clear.sh', 'clear', 'w')
+    ud.write('.sys\\cmd\\clear', "import adrv\nadrv.Disk('TMP', './disks').delete('Output.L')", 'w')
     print(f"{st.green}Done{st.r}")
 
     print(f"{st.gray}Configuring default settings...", end = ' ')

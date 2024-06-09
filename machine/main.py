@@ -106,9 +106,9 @@ while running:
         w.refresh(session)
 
         pcmd = arrowbit.parse(cmd)
-        if pcmd['module'] == 'arr' and pcmd['submodule'] in ['clear', 'reboot']:
+        if pcmd['module'] == 'arr' and pcmd['submodule'] in ['reboot']:
             os.system(userDisk.read(f".sys\\cmd\\{pcmd['submodule']}.sh").content.decode())
-        elif pcmd['module'] == 'arr' and pcmd['submodule'] in ['shutdown']:
+        elif pcmd['module'] == 'arr' and pcmd['submodule'] in ['clear', 'shutdown']:
             exec(userDisk.read(f".sys\\cmd\\{pcmd['submodule']}").content.decode())
         else:
             process.exec(pcmd)
