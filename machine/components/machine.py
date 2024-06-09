@@ -87,7 +87,8 @@ class Window:
             except:
                 return 2
         elif action == 3:
-            pass
+            rcv.installArrowBit(self.ud)
+            return 1
         
         return 2
 
