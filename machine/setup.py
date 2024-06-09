@@ -9,18 +9,20 @@ import warnings
 from components import styles as st
 from components import auth
 
+VERSION = 'ArrOS 0.1 Alpha'
+
 userDisk = adrv.Disk('ARR', './disks', 512000000000)
 tempDisk = adrv.Disk('TMP', './disks', 1024000000)
 tempDisk.format_disk()
 
-os.system('cls')
+os.system('clear')
 time.sleep(1)
 
 def config():
     print(f"{st.yellow}{st.bold}Welcome to ArrowBit !{st.r}")
     
     available_disks = []
-    for _root, _, _files in os.walk('.'):
+    for _root, _, _files in os.walk('../..'):
         for _name in _files:
             _file = os.path.join(_root, _name)
             if _name.endswith('.adrv'):
@@ -36,11 +38,13 @@ def config():
         userDisk.write('.sys\\s\\$Salt', bcrypt.gensalt(), 'w')
         print("Should we install...")
 
-        tempDisk.write('.sys\\$Bootexec.ar', 'req -g https://bowandarrow.pages.dev/modules/bow/installer.ar --save-on res;\nfile -n /.sys/bow/modules/bow/installer.ar res.content;', 'w')
+        tempDisk.write('.sys\\$Bootexec\\install.ar', 'req -g https://bowandarrow.pages.dev/modules/bow/installer.ar --save-on res;\nfile -n /.sys/bow/modules/bow/installer.ar res.content;', 'w')
         if input(f"{st.t}{st.gray}> Custom themes (Y/N){st.r} ") in ['Y', 'y', 'yes']:
-            tempDisk.write('\\$Bootexec.ar', 'bow -i "themes";')
+            tempDisk.write('.sys\\$Bootexec\\install.ar', 'bow -i "themes";')
         if input(f"{st.t}{st.gray}> Console (Y/N){st.r} ") in ['Y', 'y', 'yes']:
-            tempDisk.write('\\$Bootexec.ar', 'bow -i "console";')
+            tempDisk.write('.sys\\$Bootexec\\install.ar', 'bow -i "console";')
+
+        os.system('clear')
     else:
         print()
         print(f"{st.gray}{st.bold}All disks found in the working directory:{st.r}")
@@ -84,7 +88,8 @@ def config():
         print()
         print(f"{st.gray}Copying new disk... - {st.r}", end = '')
         userDisk.format_disk(disk_path)
-        print(f"{st.bold}{st.green}Done{st.r}")
+    
+    print(f"{st.bold}{st.yellow}Testing disk...{st.r}")
 
     if userDisk.diagnosis(True):
         print(f"{st.green}{st.bold}Your disk has been initialized with success.{st.r}")
@@ -93,25 +98,36 @@ def config():
         print("The disk will be formatted")
         userDisk.format_disk()
     
-    userDisk.write('$')
-
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category = UserWarning, module = 'zipfile')
     try:
-        if '$' not in userDisk.f_list() or '.sys\\s\\$Salt' not in userDisk.f_list():
-            config()
-    except KeyboardInterrupt as kb:
+        if '.sys\\$Info' in userDisk.f_list():
+            userDisk.delete('.sys\\$Info')
+
+        config()
+        
+        def is_allowed(username: str) -> bool:
+            allowedchars = "abcdefghijklmnopqrstuvwxyz"
+            for char in username:
+                if not (char.isdigit() or char.lower() in allowedchars or char == '.'):
+                    return False
+            
+            return True
+        
+        os.system('clear')
+        name = input(f"{st.gray}> Name your computer: {st.yellow}")
+        while not is_allowed(name):
+            print(f"{st.red}{st.bold}err{st.r} Only alphanumeric characters, periods and underscores (_) are allowed in usernames.")
+            name = input(f"{st.gray}Name your computer: {st.yellow}")
+        
+        userDisk.write('.sys\\$Info', f'{name}\n{VERSION}')
+    except KeyboardInterrupt:
         print(st.r)
         print("Configuration has been interrupted. Initializing machine... - ", end = "")
         userDisk.format_disk()
         print(st.green, st.bold, 'Done', st.r, sep = "")
 
-    print()
-
-    os.system('cls')
+    os.system('clear')
     time.sleep(1)
-    try:
-        auth.connect(userDisk, tempDisk)
-        print("Setup done ! Rebooting...")
-    except FileNotFoundError:
-        auth.create_user(userDisk, tempDisk)
+    auth.connect(userDisk, tempDisk)
+    print("Setup done ! Rebooting...")

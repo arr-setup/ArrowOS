@@ -1,11 +1,13 @@
+#!/bin/bash
+
 clear
 cd machine || exit
 
 rm -rf .venv
 
 echo "Setting a new venv..."
-python3 -m venv .venv
-source .venv/bin/activate
+python -m venv .venv
+source .venv/scripts/activate
 
 echo "Upgrading pip..."
 python -m pip install -q --upgrade pip
