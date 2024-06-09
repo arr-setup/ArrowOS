@@ -98,7 +98,7 @@ process = arrowbit.Process(userDisk, tempDisk, session)
 running = True
 while running:
     try:
-        location = os.path.normpath(os.path.join("~", "work"))
+        location = process.variables['location']
         line = f"{f'{st.pink}(admin) ' if session['admin'] else ''}{st.green}{session['username']}@{infos['name']} {st.yellow}{location}{st.r} > "
         cmd = input(line)
 
