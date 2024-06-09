@@ -10,6 +10,8 @@ import components.gateway as gtw
 userDisk = Disk('ARR', './disks', 512000000000)
 tempDisk = Disk('TMP', './disks', 1024000000)
 
+
+
 #------------------------------------- INIT COMPUTER STATE -------------------------------------
 # Fetch computer infos
 
@@ -24,6 +26,12 @@ while infos == {}:
         os.system('clear')
         exit()
 
+w = vm.Window(infos['name'], userDisk, tempDisk)
+
+_boot = 2
+while _boot != 0:
+    os.system('clear')
+    _boot = w.boot()
 
 # Try login
 
@@ -75,8 +83,6 @@ else:
 
 #------------------------------------- PROCESS -------------------------------------
 
-w = vm.Window(infos['name'], userDisk, tempDisk, session)
-
 running = True
 while running:
     try:
@@ -85,7 +91,7 @@ while running:
         cmd = input(line)
 
         tempDisk.write('Output.L', '::'.join(['cmd', location, cmd.replace('::', '\:\:')]))
-        w.refresh()
+        w.refresh(session)
     except KeyboardInterrupt:
         running = False
         os.system('cd ..')

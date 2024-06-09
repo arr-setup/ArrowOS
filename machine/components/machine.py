@@ -5,16 +5,15 @@ import adrv
 
 from components import styles as st
 from components import gateway as gtw
+from components import recovery as rcv
 
 class Window:
-    def __init__(self, name: str, ud: adrv.Disk, td: adrv.Disk, session: dict) -> None:
+    def __init__(self, name: str, ud: adrv.Disk, td: adrv.Disk) -> None:
         self.name = name
         self.ud = ud # User disk
         self.td = td # Temp disk
-        self.session = session
-        self.location = []
     
-    def refresh(self) -> None:
+    def refresh(self, session: dict) -> None:
         os.system('clear')
         outData = gtw.split(self.td.read('Output.L').content.decode())
         outData = gtw.parse(outData, ('type', 'location', 'content'))
@@ -31,7 +30,7 @@ class Window:
         
         for data in outData:
             if data['type'] == 'cmd':
-                line = f"{f'{st.pink}(admin) ' if self.session['admin'] else ''}{st.green}{self.session['username']}@{self.name} {st.yellow}{data['location']}{st.r} > "
+                line = f"{f'{st.pink}(admin) ' if session['admin'] else ''}{st.green}{session['username']}@{self.name} {st.yellow}{data['location']}{st.r} > "
 
                 syntax = r'\{[^}]*\}|\([^)]*\)|\[[^\]]*\]|\"(?:\\\"|[^\"])*\"|\'(?:\\\'|[^\'])*\'|`(?:\\\`|[^`])*`|\S+'
 
@@ -45,12 +44,12 @@ class Window:
                 
             print(line)
         
-    def ask(infos: list[tuple], prompt: str = "Choose an option: ", return_nb: bool = False):
+    def ask(self, infos: list[tuple], prompt: str = "Choose an option: ", return_nb: bool = False):
         print(prompt)
         print()
         
         for opt in range(len(infos)):
-            print(f"{st.red}{opt + 1}-{st.r}", '\t'.join(infos), sep = "\t")
+            print(f"{st.blue}{opt + 1}-{st.r}", '\t'.join(infos[opt]), sep = "\t")
 
         choice = ""
         value = ""
@@ -64,3 +63,31 @@ class Window:
             return choice - 1
         else: 
             return value
+        
+    def boot(self):
+        action = self.ask([
+            ('Start ArrowOS',),
+            ('Reset computer disk', 'Wipe all data',),
+            ('Clean tempdisk data', 'This will clear console history, active sessions, ect'),
+            ('(re)install ArrowBit', 'Unavailable')
+        ], 'What do you want to do: ', True)
+
+        if action == 0:
+            return 0
+        elif action == 1:
+            try:
+                rcv.resetData(self.ud)
+                return 1
+            except:
+                return 2
+        elif action == 2:
+            try:
+                self.td.format_disk()
+                return 1
+            except:
+                return 2
+        elif action == 3:
+            pass
+        
+        return 2
+
